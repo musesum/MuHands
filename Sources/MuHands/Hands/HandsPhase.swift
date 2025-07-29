@@ -3,7 +3,7 @@
 import SwiftUI
 import MuFlo
 
-public enum PinchState: Int {
+public enum PinchPhase: Int {
     case begin  = 0
     case update = 1
     case hover  = 2
@@ -13,11 +13,26 @@ public enum PinchState: Int {
     var update : Bool { self == .update }
     var hover  : Bool { self == .hover  }
     var end    : Bool { self == .end    }
+
+    public var description: String {
+        switch self {
+        case .begin:  return "begin"
+        case .update: return "update"
+        case .hover:  return "hover"
+        case .end:    return "end"
+        }
+    }
+}
+public struct PinchState {
+    let phase: PinchPhase
+    let finger: JointEnum
+
 }
 @MainActor
 open class HandsPhase: ObservableObject {
 
-    @Published public var state: leftRight<PinchState> = .init(.end, .end)
+    @Published public var state: leftRight<PinchPhase?> = .init(nil,nil)
+    @Published public var update: Int = 0
     private var flo˚: LeftRight<Flo>!
 
     public init(_ root˚: Flo) {
@@ -25,32 +40,55 @@ open class HandsPhase: ObservableObject {
 
         let left = pinch.bind("left" ) { f,_ in
             if let phase = f.intVal("phase") {
-               guard let state = PinchState(rawValue: phase) else { return PrintLog("❌✋uncaught phase: \(phase)") }
+                guard let pinchPhase = PinchPhase(rawValue: phase) else { return PrintLog("⁉️✋ uncaught phase: \(phase)") }
 
-                if [.begin, .end].contains(state) {
-                    PrintLog("✋ left phase: \(state.rawValue)")
-
-                    Task { @MainActor in
-                        self.state = .init(state, self.state.right)
-                    }
+                if [.begin, .end].contains(pinchPhase) {
+                    PrintLog("✋ left phase: \(pinchPhase.rawValue)")
+                }
+                Task { @MainActor in
+                    self.state = .init(pinchPhase, nil)
+                    self.update += 1
                 }
             }
         }
         let right = pinch.bind("right") { f,_ in
             if let phase = f.intVal("phase") {
-                guard let state = PinchState(rawValue: phase) else { return PrintLog("❌🤚uncaught phase: \(phase)") }
+                guard let pinchPhase = PinchPhase(rawValue: phase) else { return PrintLog("⁉️🤚uncaught phase: \(phase)") }
 
-                if [.begin, .end].contains(state)  {
-                    PrintLog("🤚 right phase: \(state.rawValue)")
-
-                    Task { @MainActor in
-                        self.state = .init(self.state.left, state)
-                    }
+                if [.begin, .end].contains(pinchPhase)  {
+                    PrintLog("🤚 right phase: \(pinchPhase.rawValue)")
+                }
+                Task { @MainActor in
+                    self.state = .init(nil, pinchPhase)
+                    self.update += 1
                 }
             }
         }
         self.flo˚ = .init(left, right)
     }
 
+    public var icon: String {
+        var ret = ""
+        if let phase = state.left {
+            switch phase  {
+            case .begin : ret += "🔰"
+            case .end   : ret += "♦️"
+            default     : ret += "🔸"
+            }
+        } else {
+            ret += "⬜︎"
+        }
+        ret += "👐"
+        if let phase = state.right {
+            switch phase  {
+            case .begin : ret += "🔰"
+            case .end   : ret += "♦️"
+            default     : ret += "🔸"
+            }
+        } else {
+            ret += "⬜︎"
+        }
+        return ret
+    }
 }
 

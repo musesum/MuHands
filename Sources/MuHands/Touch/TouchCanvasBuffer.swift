@@ -96,11 +96,14 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         
         if buffer.isEmpty,
            touchRepeat,
-           previousItem != nil {
+           let previousItem {
             // finger is stationary repeat last movement
             // don't update touchCubic.addPointRadius
             touchCubic.drawPoints(canvas.touchDraw.drawPoint)
-            
+            if previousItem.isDone {
+                isDone = true
+            }
+
         } else {
             let state = buffer.flushBuf()
             switch state {

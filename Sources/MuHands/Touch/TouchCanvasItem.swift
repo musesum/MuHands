@@ -3,7 +3,7 @@ import MuFlo
 
 public struct TouchCanvasItem: Codable, TimedItem, Sendable {
 
-    public let key    : Int    // unique id of touch
+    public let hash   : Hash    // unique id of touch
     public let time   : Double // time event was created
     public let nextX  : Float  // touch point x
     public let nextY  : Float  // touch point y
@@ -14,7 +14,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
     public let phase  : Int    // UITouch.Phase.rawValue
     public let type   : Int    // Visitor.type
 
-    public init(_ key     : Int,
+    public init(_ hash    : Hash,
                 _ next    : CGPoint,
                 _ radius  : Float,
                 _ force   : Float,
@@ -24,7 +24,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
 
         // tested timeDrift between UITouches.time and Date() is around 30 msec
         self.time   = Date().timeIntervalSince1970
-        self.key    = key
+        self.hash   = hash
         self.nextX  = Float(next.x)
         self.nextY  = Float(next.y)
         self.radius = Float(radius)
@@ -54,7 +54,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
         }
 
         self.time   = Date().timeIntervalSince1970
-        self.key    = touchData.key
+        self.hash   = touchData.hash
         self.nextX  = Float(touchData.nextXY.x)
         self.nextY  = Float(touchData.nextXY.y)
         self.radius = Float(touchData.radius)
@@ -66,15 +66,15 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
         logTouch()
     }
 
-    init(_ lastItem: TouchCanvasItem? = nil,
-         _ key     : Int,
-         _ force   : CGFloat,
-         _ radius  : CGFloat,
-         _ next    : CGPoint,
-         _ phase   : UITouch.Phase,
-         _ azimuth : CGFloat,
-         _ altitude: CGFloat,
-         _ visit   : Visitor) {
+    init(_ lastItem : TouchCanvasItem? = nil,
+         _ hash     : Int,
+         _ force    : CGFloat,
+         _ radius   : CGFloat,
+         _ next     : CGPoint,
+         _ phase    : UITouch.Phase,
+         _ azimuth  : CGFloat,
+         _ altitude : CGFloat,
+         _ visit    : Visitor) {
 
         let alti = (.pi/2 - altitude) / .pi/2
         let azim = CGVector(dx: -sin(azimuth) * alti, dy: cos(azimuth) * alti)
@@ -93,7 +93,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
             force = 0 // bug: always begins at 0.5
         }
         self.time   = Date().timeIntervalSince1970
-        self.key    = key
+        self.hash   = hash
         self.nextX  = Float(next.x)
         self.nextY  = Float(next.y)
         self.radius = Float(radius)
@@ -106,7 +106,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
     init(repeated: TouchCanvasItem) {
 
         self.time   = Date().timeIntervalSince1970
-        self.key    = repeated.key
+        self.hash   = repeated.hash
         self.nextX  = repeated.nextX
         self.nextY  = repeated.nextY
         self.radius = repeated.radius

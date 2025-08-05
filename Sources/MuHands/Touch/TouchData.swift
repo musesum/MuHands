@@ -2,6 +2,8 @@
 
 import UIKit
 
+public typealias Hash = Int
+
 public struct TouchData {
     let force    : Float
     let radius   : Float
@@ -9,7 +11,7 @@ public struct TouchData {
     let phase    : Int
     let azimuth  : CGFloat
     let altitude : CGFloat
-    let key      : Int
+    let hash     : Hash
 
     public init(force    : Float,
                 radius   : Float,
@@ -17,7 +19,7 @@ public struct TouchData {
                 phase    : Int,
                 azimuth  : CGFloat,
                 altitude : CGFloat,
-                key      : Int) {
+                hash     : Hash) {
 
         self.force    = force
         self.radius   = radius
@@ -25,6 +27,6 @@ public struct TouchData {
         self.phase    = phase
         self.azimuth  = azimuth
         self.altitude = altitude
-        self.key      = key
+        self.hash     = hash
     }
 }

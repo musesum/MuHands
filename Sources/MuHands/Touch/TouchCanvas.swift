@@ -54,21 +54,20 @@ extension TouchCanvas { // + TouchData
 
     public func beginTouch(_ touchData: TouchData) {
         if immersive { return }
-
-        touchBuffers[touchData.key] = TouchCanvasBuffer(touchData, self)
+        touchBuffers[touchData.hash] = TouchCanvasBuffer(touchData, self)
     }
 
     public func updateTouch(_ touchData: TouchData) {
         if immersive { return }
-        if let touchBuffer = touchBuffers[touchData.key] {
+        if let touchBuffer = touchBuffers[touchData.hash] {
             touchBuffer.addTouchItem(touchData)
         }
     }
     public func remoteItem(_ item: TouchCanvasItem) {
-        if let touchBuffer = touchBuffers[item.key] {
+        if let touchBuffer = touchBuffers[item.hash] {
             touchBuffer.buffer.addItem(item, bufType: .remoteBuf)
         } else {
-            touchBuffers[item.key] = TouchCanvasBuffer(item, self)
+            touchBuffers[item.hash] = TouchCanvasBuffer(item, self)
         }
     }
 }

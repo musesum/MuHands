@@ -5,8 +5,6 @@ import MuPeers
 
 extension TouchCanvas: PeersDelegate {
 
-    public func didChange() {}
-
     public func received(data: Data) {
 
         let decoder = JSONDecoder()

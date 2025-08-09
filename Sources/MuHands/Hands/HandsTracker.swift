@@ -15,7 +15,7 @@ open class HandsTracker: ObservableObject {
 
         self.handsPose = handsFlo
     }
-    nonisolated(nonsending)
+
     public func startHands() async {
 
         do {

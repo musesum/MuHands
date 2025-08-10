@@ -4,25 +4,28 @@ import SwiftUI
 import MuFlo
 
 public enum PinchPhase: Int {
-    case begin  = 0
+    case began  = 0
     case update = 1
-    case hover  = 2
-    case end    = 3
+    case ended  = 3
 
-    var begin  : Bool { self == .begin  }
-    var update : Bool { self == .update }
-    var hover  : Bool { self == .hover  }
-    var end    : Bool { self == .end    }
+    public var begin  : Bool { self == .began  }
+    public var update : Bool { self == .update }
+    public var end    : Bool { self == .ended  }
 
     public var description: String {
         switch self {
-        case .begin:  return "begin"
-        case .update: return "update"
-        case .hover:  return "hover"
-        case .end:    return "end"
+        case .began  : return "begin"
+        case .update : return "update"
+        case .ended  : return "end"
         }
     }
+    public static func min(_ state: leftRight<PinchPhase?>) -> PinchPhase {
+        let lvalue = state.left ?? .ended
+        let rvalue = state.right ?? .ended
+        return lvalue.rawValue < rvalue.rawValue ? lvalue : rvalue
+    }
 }
+
 public struct PinchState {
     let phase: PinchPhase
     let finger: JointEnum
@@ -31,49 +34,59 @@ public struct PinchState {
 @MainActor
 open class HandsPhase: ObservableObject {
 
-    @Published public var state: leftRight<PinchPhase?> = .init(nil,nil)
     @Published public var update: Int = 0
+    public var state: leftRight<PinchPhase?> = .init(nil,nil)
+    public var taps: LeftRight<Int> = .init(0,0)
+
     private var flo˚: LeftRight<Flo>!
+    private var began: LeftRight<TimeInterval> = .init(0,0)
+    private var ended: LeftRight<TimeInterval> = .init(0,0)
 
     public init(_ root˚: Flo) {
         let pinch = root˚.bind("hand.pinch" )
 
-        let left = pinch.bind("left" ) { f,_ in
-            if let phase = f.intVal("phase") {
-                guard let pinchPhase = PinchPhase(rawValue: phase) else { return PrintLog("⁉️✋ uncaught phase: \(phase)") }
-
-                if [.begin, .end].contains(pinchPhase) {
-                    PrintLog("✋ left phase: \(pinchPhase.rawValue)")
-                }
-                Task { @MainActor in
-                    self.state = .init(pinchPhase, nil)
-                    self.update += 1
-                }
-            }
-        }
-        let right = pinch.bind("right") { f,_ in
-            if let phase = f.intVal("phase") {
-                guard let pinchPhase = PinchPhase(rawValue: phase) else { return PrintLog("⁉️🤚uncaught phase: \(phase)") }
-
-                if [.begin, .end].contains(pinchPhase)  {
-                    PrintLog("🤚 right phase: \(pinchPhase.rawValue)")
-                }
-                Task { @MainActor in
-                    self.state = .init(nil, pinchPhase)
-                    self.update += 1
-                }
-            }
-        }
+        let left = pinch.bind("left" ) { f,_ in  self.pinched(f, .left) }
+        let right = pinch.bind("right") { f,_ in self.pinched(f, .right) }
         self.flo˚ = .init(left, right)
     }
+    func pinched(_ flo: Flo, _ chiral: Chiral) {
+        guard let rawPhase = flo.intVal("phase") else {
+            return err("'phase' expression not found.") }
+        guard let phase = PinchPhase(rawValue: rawPhase) else {
+            return err("rawPhase: \(rawPhase) invalid.") }
 
-    public var icon: String {
+        let timeNow = Date().timeIntervalSince1970
+
+        switch phase {
+        case .began:
+            began.set(chiral, timeNow)
+        case .ended:
+            began.set(chiral, timeNow)
+            let delta = ended.get(chiral) - began.get(chiral)
+            let tapsNow = delta < 0.3 ? taps.get(chiral) + 1 : 0
+            taps.set(chiral, tapsNow)
+        default: break
+        }
+
+        Task { @MainActor in
+            switch chiral {
+            case .left  : state = .init(phase, nil)
+            case .right : state = .init(nil, phase)
+            }
+            update += 1
+        }
+        func err(_ msg: String) {
+            PrintLog("⁉️\(chiral.icon) \(#function) \(msg)")
+        }
+    }
+
+    public var handsIcon: String {
         var ret = ""
         if let phase = state.left {
             switch phase  {
-            case .begin : ret += "🔰"
-            case .end   : ret += "♦️"
-            default     : ret += "🔸"
+            case .began : ret += "🔰"
+            case .ended : ret += "🛑"
+            default     : ret += "🔷"
             }
         } else {
             ret += "⬜︎"
@@ -81,9 +94,9 @@ open class HandsPhase: ObservableObject {
         ret += "👐"
         if let phase = state.right {
             switch phase  {
-            case .begin : ret += "🔰"
-            case .end   : ret += "♦️"
-            default     : ret += "🔸"
+            case .began : ret += "🔰"
+            case .ended : ret += "🛑"
+            default     : ret += "🔷"
             }
         } else {
             ret += "⬜︎"

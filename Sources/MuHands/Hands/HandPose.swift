@@ -160,7 +160,7 @@ public class HandPose {
             }
         }
         if count > 0, let chiral {
-            TimeLog(#function, interval: 4) { P(chiral.icon + "👍\(count)") }
+            NoTimeLog(#function, interval: 4) { P(chiral.icon + "👍\(count)") }
         }
     }
 

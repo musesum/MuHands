@@ -11,42 +11,41 @@ open class TouchCanvasBuffer: @unchecked Sendable {
     private var previousItem: TouchCanvasItem?
     
     // each finger or brush gets its own double buffer
-    public let buffer = TimedBuffer<TouchCanvasItem>(capacity: 5, internalLoop: false)
+    public let buffer:TimedBuffer<TouchCanvasItem>
     private var indexNow = 0
     private var canvas: TouchCanvas
     private var isDone = false
     private var touchCubic = TouchCubic()
     private var touchLog = TouchLog()
 
-    deinit {
-        Panic.remove(id)
-    }
-
     public init(_ touch: TouchData,
                 _ canvas: TouchCanvas) {
         
         self.canvas = canvas
+        self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 5)
         buffer.delegate = self
         addTouchItem(touch)
-        Panic.add(id,self)
+        Reset.add(id,self)
     }
     
     public init(_ item: TouchCanvasItem,
                 _ canvas: TouchCanvas) {
 
         self.canvas = canvas
+        self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 5)
         buffer.delegate = self
         buffer.addItem(item, bufType: .remoteBuf)
-        Panic.add(id,self)
+        Reset.add(id,self)
     }
     
     public init(_ joint: JointState,
                 _ canvas: TouchCanvas) {
         
         self.canvas = canvas
+        self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 5)
         buffer.delegate = self
         addTouchHand(joint)
-        Panic.add(id,self)
+        Reset.add(id,self)
     }
     
     public func addTouchHand(_ joint: JointState) {
@@ -118,6 +117,9 @@ open class TouchCanvasBuffer: @unchecked Sendable {
 
             }
         }
+        if isDone {
+            Reset.remove(id)
+        }
         return isDone
     }
 }
@@ -139,9 +141,9 @@ extension TouchCanvasBuffer: TimedBufferDelegate {
     }
 }
 
-extension TouchCanvasBuffer: PanicReset {
-    public func reset() {
-        buffer.reset() // assuming reset() empties the buffer; replace with buffer.clear() if that is the correct API
+extension TouchCanvasBuffer: ResetDelegate {
+    public func resetAll() {
+        buffer.resetAll() // assuming reset() empties the buffer; replace with buffer.clear() if that is the correct API
         previousItem = nil
         indexNow = 0
         isDone = false

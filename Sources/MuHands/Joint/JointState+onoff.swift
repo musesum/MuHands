@@ -37,7 +37,7 @@ extension JointState {
                 let mine = path + pos.digits(-2)
                 let index = "indexTip\(indexTip.pos.digits(-2))"
                 let label = "\(prefix)\(mine) ∆ \(index) => \(distance.digits(3)) "
-                print(label)
+                PrintLog(label)
             }
 
         }

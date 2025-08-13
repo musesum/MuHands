@@ -48,7 +48,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
 
             let radiusFilter = Float(0.95)
             radius = (prevItem.radius * radiusFilter) + (radius * (1-radiusFilter))
-            //print(String(format: "* %.3f -> %.3f", lastItem.force, force))
+            //PrintLog(String(format: "* %.3f -> %.3f", lastItem.force, force))
         } else {
             force = 0 // bug: always begins at 0.5
         }
@@ -88,7 +88,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
 
             let radiusFilter = Float(0.95)
             radius = (lastItem.radius * radiusFilter) + (radius * (1-radiusFilter))
-            //print(String(format: "* %.3f -> %.3f", lastItem.force, force))
+            //PrintLog(String(format: "* %.3f -> %.3f", lastItem.force, force))
         } else {
             force = 0 // bug: always begins at 0.5
         }

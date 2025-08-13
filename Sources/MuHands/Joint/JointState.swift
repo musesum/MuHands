@@ -133,11 +133,11 @@ public class JointState {
                         ranges = "🔳 (\(xRange), \(yRange), \(zRange))"
                     }
 
-                    print("\(color) \(mine) \(ranges)")
+                    P("\(color) \(mine) \(ranges)")
                 } else {
                     let phase = "👐phase \(oldPhase) => \(phase.rawValue) taps \(self.taps) \(self.taps > 2 ? "🔳" : "")"
                     let tip =  "∆ thumbTip =>\(distance.digits(3)) \(phase)"
-                    print("\(color) \(mine) \(tip)")
+                    P("\(color) \(mine) \(tip)")
 
                 }
             }

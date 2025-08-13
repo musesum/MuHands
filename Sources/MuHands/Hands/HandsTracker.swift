@@ -29,7 +29,7 @@ open class HandsTracker: ObservableObject {
                 await monitorSessionEvents()
             }
         } catch {
-            print("⁉️ 🤲 handTracking error:", error)
+            PrintLog("⁉️ 🤲 handTracking error:", error)
         }
     }
 
@@ -55,7 +55,7 @@ open class HandsTracker: ObservableObject {
                     // Ask the user to grant hand tracking authorization again in Settings.
                 }
             default:
-                print("Session event \(event)")
+                PrintLog("Session event \(event)")
             }
         }
     }

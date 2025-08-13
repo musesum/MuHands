@@ -3,7 +3,7 @@
 import SwiftUI
 import MuFlo
 
-public enum PinchPhase: Int {
+public enum TouchPhase: Int {
     case began  = 0
     case update = 1
     case ended  = 3
@@ -19,7 +19,7 @@ public enum PinchPhase: Int {
         case .ended  : return "end"
         }
     }
-    public static func min(_ state: leftRight<PinchPhase?>) -> PinchPhase {
+    public static func min(_ state: leftRight<TouchPhase?>) -> TouchPhase {
         let lvalue = state.left ?? .ended
         let rvalue = state.right ?? .ended
         return lvalue.rawValue < rvalue.rawValue ? lvalue : rvalue
@@ -27,7 +27,7 @@ public enum PinchPhase: Int {
 }
 
 public struct PinchState {
-    let phase: PinchPhase
+    let phase: TouchPhase
     let finger: JointEnum
 
 }
@@ -35,7 +35,7 @@ public struct PinchState {
 open class HandsPhase: ObservableObject {
 
     @Published public var update: Int = 0
-    public var state: leftRight<PinchPhase?> = .init(nil,nil)
+    public var state: leftRight<TouchPhase?> = .init(nil,nil)
     public var taps: LeftRight<Int> = .init(0,0)
 
     private var flo˚: LeftRight<Flo>!
@@ -52,7 +52,7 @@ open class HandsPhase: ObservableObject {
     func pinched(_ flo: Flo, _ chiral: Chiral) {
         guard let rawPhase = flo.intVal("phase") else {
             return err("'phase' expression not found.") }
-        guard let phase = PinchPhase(rawValue: rawPhase) else {
+        guard let phase = TouchPhase(rawValue: rawPhase) else {
             return err("rawPhase: \(rawPhase) invalid.") }
 
         let timeNow = Date().timeIntervalSince1970
@@ -80,7 +80,7 @@ open class HandsPhase: ObservableObject {
         }
     }
 
-    public var handsIcon: String {
+    public var handsState: String {
         var ret = ""
         if let phase = state.left {
             switch phase  {
@@ -100,6 +100,9 @@ open class HandsPhase: ObservableObject {
             }
         } else {
             ret += "⬜︎"
+        }
+        if taps.left > 0 || taps.right > 0 {
+            ret += " taps: \(taps.left)👐\(taps.right)"
         }
         return ret
     }

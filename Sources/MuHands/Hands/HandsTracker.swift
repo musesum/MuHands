@@ -29,7 +29,7 @@ open class HandsTracker: ObservableObject {
                 await monitorSessionEvents()
             }
         } catch {
-            PrintLog("⁉️ 🤲 handTracking error:", error)
+            PrintLog("⁉️ 🤲 handTracking error: \(error)")
         }
     }
 

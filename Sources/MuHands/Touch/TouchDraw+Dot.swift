@@ -12,7 +12,7 @@ extension TouchDraw {
         // if using Apple Pencil and brush tilt is turned on
         if item.force > 0, tilt {
             let azi = CGPoint(x: CGFloat(-item.azimY), y: CGFloat(-item.azimX))
-            azimuth˚?.setAnyExprs(azi, .fire, visit)
+            azimuth˚?.setAnyValue(azi, .fire, visit)
             //PrintGesture("azimuth dXY(%.2f,%.2f)", item.azimuth.dx, item.azimuth.dy)
         }
 
@@ -20,10 +20,10 @@ extension TouchDraw {
         var radiusNow = CGFloat(1)
         if press {
             if force > 0 || item.azimX != 0.0 {
-                force˚?.setAnyExprs(item.force, .fire, visit) // will update local azimuth via FloGraph
+                force˚?.setAnyValue(item.force, .fire, visit) // will update local azimuth via FloGraph
                 radiusNow = size
             } else {
-                radius˚?.setAnyExprs(item.radius, .fire, visit)
+                radius˚?.setAnyValue(item.radius, .fire, visit)
                 radiusNow = radius
             }
         } else {

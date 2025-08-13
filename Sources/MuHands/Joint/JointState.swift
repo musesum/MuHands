@@ -154,7 +154,7 @@ public class JointState {
                    _ taps: Int) {
         self.phase = phase
         self.time = Date().timeIntervalSince1970
-        let nameDoubles: [(String,Double)] = [
+        let nameNums: [(String,Double)] = [
             ("x",     Double(pos.x)),
             ("y",     Double(pos.y)),
             ("z",     Double(pos.z)),
@@ -163,7 +163,7 @@ public class JointState {
             ("taps",  Double(taps)),
             ("joint", Double(joint.rawValue))]
         if let joint˚ {
-            joint˚.exprs?.setFromAny(nameDoubles, setOps, Visitor(0))
+            joint˚.exprs?.setFromNameNums(nameNums, setOps, Visitor(0))
             if setOps == .fire {
                 joint˚.activate([], from: joint˚)
             }

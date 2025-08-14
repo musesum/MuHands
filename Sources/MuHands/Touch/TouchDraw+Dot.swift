@@ -11,19 +11,19 @@ extension TouchDraw {
 
         // if using Apple Pencil and brush tilt is turned on
         if item.force > 0, tilt {
-            let azi = CGPoint(x: CGFloat(-item.azimY), y: CGFloat(-item.azimX))
-            azimuth˚?.setAnyValue(azi, .fire, visit)
-            //PrintGesture("azimuth dXY(%.2f,%.2f)", item.azimuth.dx, item.azimuth.dy)
+
+            azimuth˚?.setNameNums([("x",-item.azimY),
+                                   ("y",-item.azimY)], .fire, visit)
         }
 
         // if brush press is turned on
         var radiusNow = CGFloat(1)
         if press {
             if force > 0 || item.azimX != 0.0 {
-                force˚?.setAnyValue(item.force, .fire, visit) // will update local azimuth via FloGraph
+                force˚?.setVal(Double(item.force), .fire, visit) // will update local azimuth via FloGraph
                 radiusNow = size
             } else {
-                radius˚?.setAnyValue(item.radius, .fire, visit)
+                radius˚?.setVal(Double(item.radius), .fire, visit)
                 radiusNow = radius
             }
         } else {

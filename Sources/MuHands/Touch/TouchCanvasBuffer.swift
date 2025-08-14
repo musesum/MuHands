@@ -11,7 +11,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
     private var previousItem: TouchCanvasItem?
     
     // each finger or brush gets its own double buffer
-    public let buffer:TimedBuffer<TouchCanvasItem>
+    public let buffer: TimedBuffer<TouchCanvasItem>
     private var indexNow = 0
     private var canvas: TouchCanvas
     private var isDone = false
@@ -63,11 +63,13 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         
         let item = TouchCanvasItem(previousItem, joint.hash, force, radius, nextXY, phase, azimuth, altitude, Visitor(0, .canvas))
         buffer.addItem(item, bufType: .localBuf)
-        let sendItem = item // Avoid data race by using a constant
+        shareItem(item)
+    }
+    func shareItem(_ item: TouchCanvasItem) {
         Task {
             await canvas.peers.sendItem(.touchFrame) {
                 do {
-                    return try JSONEncoder().encode(sendItem)
+                    return try JSONEncoder().encode(item)
                 } catch {
                     print(error)
                     return nil

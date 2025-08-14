@@ -12,5 +12,4 @@ extension TouchCanvas: PeersDelegate {
             remoteItem(item)
         }
     }
-
 }

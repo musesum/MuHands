@@ -24,14 +24,14 @@ open class TouchCanvas: @unchecked Sendable {
     }
     
     let touchDraw: TouchDraw
-    public let peers: Peers
+    public let share: Share
     public var immersive = false
 
     public init(_ touchDraw: TouchDraw,
-                _ peers: Peers) {
+                _ share: Share) {
         self.touchDraw = touchDraw
-        self.peers = peers
-        peers.setDelegate(self, for: .touchFrame)
+        self.share = share
+        share.peers.addDelegate(self, for: .touchFrame)
     }
 
     public func beginJointState(_ jointState: JointState) {

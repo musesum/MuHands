@@ -78,9 +78,9 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         }
     }
 
-    public func addTouchItem(_ touch: TouchData) {
+    public func addTouchItem(_ touchData: TouchData) {
 
-        let item = TouchCanvasItem(previousItem, touch)
+        let item = TouchCanvasItem(previousItem, touchData)
         buffer.addItem(item, bufType: .localBuf)
         Task {
             await canvas.share.peers.sendItem(.touchFrame) {
@@ -93,13 +93,13 @@ open class TouchCanvasBuffer: @unchecked Sendable {
             }
         }
     }
+
     func flushTouches(_ touchRepeat: Bool) -> Bool {
         
         if buffer.isEmpty,
            touchRepeat,
            let previousItem {
             // finger is stationary repeat last movement
-            // don't update touchCubic.addPointRadius
             touchCubic.drawPoints(canvas.touchDraw.drawPoint)
             if previousItem.isDone {
                 isDone = true
@@ -120,7 +120,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
             }
         }
         if isDone {
-            Reset.remove(id)
+            Reset.remove(id) // remove Panic
         }
         return isDone
     }
@@ -135,7 +135,6 @@ extension TouchCanvasBuffer: TimedBufferDelegate {
         let point = item.cgPoint
         isDone = item.isDone
         previousItem = isDone ? nil : item.repeated()
-        
         touchCubic.addPointRadius(point, radius, isDone)
         touchCubic.drawPoints(canvas.touchDraw.drawPoint)
         

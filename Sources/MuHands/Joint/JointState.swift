@@ -51,7 +51,7 @@ public class JointState {
             joint˚.setExpr("state", self)
             updateJoint(joint˚)
             if self.on {
-                DebugLog { P("🖐️ "+joint˚.path(3)+"(on: \(self.on))") }
+                DebugLog { P(chiral.icon+joint˚.path(3)+"(on: \(self.on))") }
             }
             return on
         } else {

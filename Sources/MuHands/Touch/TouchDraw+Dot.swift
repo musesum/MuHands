@@ -13,7 +13,7 @@ extension TouchDraw {
         if item.force > 0, tilt {
 
             azimuth˚?.setNameNums([("x",-item.azimY),
-                                   ("y",-item.azimY)], .fire, visit)
+                                   ("y",-item.azimX)], .fire, visit)
         }
 
         // if brush press is turned on

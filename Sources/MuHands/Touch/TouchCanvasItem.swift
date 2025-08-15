@@ -34,12 +34,12 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
         self.phase  = Int(phase.rawValue)
         self.type   = visit.type.rawValue
     }
-    init(_ prevItem: TouchCanvasItem? = nil,
+    init(_ prevItem: TouchCanvasItem?,
          _ touchData: TouchData) {
         
         var force = touchData.force
         var radius = touchData.radius
-        
+
         let alti = (.pi/2 - touchData.altitude) / .pi/2
         let azim = CGVector(dx: -sin(touchData.azimuth) * alti, dy: cos(touchData.azimuth) * alti)
         if let prevItem {
@@ -57,7 +57,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
         self.hash   = touchData.hash
         self.nextX  = Float(touchData.nextXY.x)
         self.nextY  = Float(touchData.nextXY.y)
-        self.radius = Float(touchData.radius)
+        self.radius = radius
         self.force  = force
         self.azimX  = azim.dx
         self.azimY  = azim.dy
@@ -135,13 +135,15 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
     }
 
     var isActive: Bool {
-        let active = [UITouch.Phase.began.rawValue,
-                      UITouch.Phase.moved.rawValue,
-                      UITouch.Phase.stationary.rawValue].contains(phase)
-        return active
+        [UITouch.Phase.began.rawValue,
+         UITouch.Phase.moved.rawValue,
+         UITouch.Phase.stationary.rawValue]
+            .contains(phase)
     }
     var isDone:  Bool {
-        return !isActive
+        [UITouch.Phase.ended.rawValue,
+         UITouch.Phase.cancelled.rawValue]
+            .contains(phase)
     }
 }
 

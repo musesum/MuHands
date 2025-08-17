@@ -11,6 +11,17 @@ open class TouchCanvas: @unchecked Sendable {
     
     var touchRepeat = true
     var touchBuffers = [Int: TouchCanvasBuffer]()
+    public let touchDraw: TouchDraw
+    
+    public let share: Share
+    public var immersive = false
+
+    public init(_ touchDraw: TouchDraw,
+                _ share: Share) {
+        self.touchDraw = touchDraw
+        self.share = share
+        share.peers.addDelegate(self, for: .touchFrame)
+    }
 
     public func flushTouchCanvas() {
         var removeKeys = [Int]()
@@ -21,17 +32,6 @@ open class TouchCanvas: @unchecked Sendable {
         for key in removeKeys {
             touchBuffers.removeValue(forKey: key)
         }
-    }
-    
-    let touchDraw: TouchDraw
-    public let share: Share
-    public var immersive = false
-
-    public init(_ touchDraw: TouchDraw,
-                _ share: Share) {
-        self.touchDraw = touchDraw
-        self.share = share
-        share.peers.addDelegate(self, for: .touchFrame)
     }
 
     public func beginJointState(_ jointState: JointState) {
@@ -71,5 +71,3 @@ extension TouchCanvas { // + TouchData
         }
     }
 }
-
-

@@ -27,11 +27,12 @@ public class TouchDraw {
     public private(set) var azimuth = CGPoint.zero
     public let scale: CGFloat
 
-    var fill = Float(-1)
+    public var drawPoints: [DrawPoint] = [] //.....
+
+    var fill = Float(0)
     var bufSize = CGSize.zero
     var drawBuf: UnsafeMutablePointer<UInt32>?
 
-    public var drawProto: TouchDrawProtocol? = TouchDrawDot()
     public var drawableSize = CGSize.zero
     public var drawTex: MTLTexture?
 
@@ -57,6 +58,52 @@ public class TouchDraw {
         force˚   = input .bind("force"  ) { f,_ in self.force   = f.cgFloat }
         radius˚  = input .bind("radius" ) { f,_ in self.radius  = f.cgFloat }
         azimuth˚ = input .bind("azimuth") { f,_ in self.azimuth = f.cgPoint }
-        fill˚    = screen.bind("fill"   ) { f,_ in self.fill    = f.float   }
+        fill˚    = screen.bind("fill"   ) { f,_ in setFill(f.float)
+        }
+        func setFill(_ f: Float) {
+            fill = f
+            drawPoints.removeAll(keepingCapacity: true)
+            drawPoints.append(DrawPoint(fill: f))
+        }
+    }
+}
+extension TouchDraw {
+    /// get radius of TouchCanvasItem
+    public func updateRadius(_ item: TouchCanvasItem) -> CGFloat {
+
+        let visit = item.visit()
+
+        // if using Apple Pencil and brush tilt is turned on
+        if item.force > 0, tilt {
+
+            azimuth˚?.setNameNums([("x",-item.azimY),
+                                   ("y",-item.azimX)], .fire, visit)
+        }
+
+        // if brush press is turned on
+        var radiusNow = CGFloat(1)
+        if press {
+            if force > 0 || item.azimX != 0.0 {
+                force˚?.setVal(Double(item.force), .fire, visit) // will update local azimuth via FloGraph
+                radiusNow = size
+            } else {
+                radius˚?.setVal(Double(item.radius), .fire, visit)
+                radiusNow = radius
+            }
+        } else {
+            radiusNow = size
+        }
+        return radiusNow
+    }
+
+}
+
+extension TouchDraw {
+
+    public func drawPoint(_ point: CGPoint,
+                          _ radius: CGFloat) {
+
+        let drawPoint = DrawPoint(point, radius, brush, scale)
+        drawPoints.append(drawPoint)
     }
 }

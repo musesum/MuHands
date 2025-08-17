@@ -28,7 +28,10 @@ public class JointDrawState: JointState {
             guard let joint = from.getExpr("state") as? JointState else { return err("not a JointState") }
             guard let touchCanvas = self.touchCanvas else { return err("touchCanvas == nil") }
 
-            TimeLog("👐 from", interval: 4) { P("👐 from: \(from.path(3)) hash: \(joint.hash)") }
+            TimeLog("👐 from", interval: 4) {
+                let path = from.path(3)
+                P("👐 from: \(path) hash: \(joint.hash)")
+            }
 
             switch self.phase {
             case .began: touchCanvas.beginJointState(joint)

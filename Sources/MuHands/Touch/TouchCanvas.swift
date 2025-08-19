@@ -15,10 +15,15 @@ open class TouchCanvas: @unchecked Sendable {
     
     public let share: Share
     public var immersive = false
+    public var drawableSize = CGSize.zero
+    public let scale: CGFloat
+
 
     public init(_ touchDraw: TouchDraw,
+                _ scale: CGFloat,
                 _ share: Share) {
         self.touchDraw = touchDraw
+        self.scale = scale
         self.share = share
         share.peers.addDelegate(self, for: .touchFrame)
     }

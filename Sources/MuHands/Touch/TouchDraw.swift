@@ -27,14 +27,7 @@ public class TouchDraw {
     public private(set) var azimuth = CGPoint.zero
     public let scale: CGFloat
 
-    public var drawPoints: [DrawPoint] = [] //.....
-
-    var fill = Float(0)
-    var bufSize = CGSize.zero
-    var drawBuf: UnsafeMutablePointer<UInt32>?
-
-    public var drawableSize = CGSize.zero
-    public var drawTex: MTLTexture?
+    public var drawPoints: [DrawPoint] = []
 
     public init(_ root: Flo,
                 _ scale: CGFloat) {
@@ -61,7 +54,6 @@ public class TouchDraw {
         fill˚    = screen.bind("fill"   ) { f,_ in setFill(f.float)
         }
         func setFill(_ f: Float) {
-            fill = f
             drawPoints.removeAll(keepingCapacity: true)
             drawPoints.append(DrawPoint(fill: f))
         }

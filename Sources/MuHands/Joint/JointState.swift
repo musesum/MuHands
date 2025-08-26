@@ -45,7 +45,7 @@ public class JointState {
 
         joint˚ = hand˚.bind(joint.name) { flo,_ in
             self.updateJoint(flo)
-            flo.activate([], from: flo)
+            flo.reactivate()
         }
         if let joint˚ {
             joint˚.setExpr("state", self)
@@ -165,7 +165,7 @@ public class JointState {
         if let joint˚ {
             joint˚.exprs?.setFromNameNums(nameNums, setOps, Visitor(0))
             if setOps == .fire {
-                joint˚.activate([], from: joint˚)
+                joint˚.reactivate()
             }
         }
     }

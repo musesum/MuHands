@@ -39,12 +39,12 @@ open class HandsPhase: ObservableObject {
     public var taps: LeftRight<Int> = .init(0,0)
 
     private var flo˚: LeftRight<Flo>!
-    private var began: LeftRight<TimeInterval> = .init(0,0)
-    private var ended: LeftRight<TimeInterval> = .init(0,0)
+    private var beganTime: LeftRight<TimeInterval> = .init(0,0)
+    private var endedTime: LeftRight<TimeInterval> = .init(0,0)
 
     public init(_ root˚: Flo) {
-        let pinch = root˚.bind("hand.pinch" )
 
+        let pinch = root˚.bind("hand.pinch" )
         let left = pinch.bind("left" ) { f,_ in  self.pinched(f, .left) }
         let right = pinch.bind("right") { f,_ in self.pinched(f, .right) }
         self.flo˚ = .init(left, right)
@@ -59,13 +59,29 @@ open class HandsPhase: ObservableObject {
 
         switch phase {
         case .began:
-            began.set(chiral, timeNow)
+
+            beganTime.set(chiral,timeNow)
+            let delta = timeNow - endedTime.get(chiral)
+            if delta > 0.3 {
+                taps.set(chiral, 0)
+            }
+
+        case .update:
+            // clear out taps for both hands
+            let deltaLeft = timeNow - endedTime.get(.left)
+            if deltaLeft > 0.3 {
+                taps.set(.left, 0)
+            }
+            let deltaRight = timeNow - endedTime.get(.right)
+            if deltaRight > 0.3 {
+                taps.set(.right, 0)
+            }
+
         case .ended:
-            began.set(chiral, timeNow)
-            let delta = ended.get(chiral) - began.get(chiral)
-            let tapsNow = delta < 0.3 ? taps.get(chiral) + 1 : 0
-            taps.set(chiral, tapsNow)
-        default: break
+            
+            endedTime.set(chiral,timeNow)
+            let delta = timeNow - beganTime.get(chiral)
+            taps.set(chiral, delta < 0.3 ? taps.get(chiral) + 1 : 0)
         }
 
         Task { @MainActor in

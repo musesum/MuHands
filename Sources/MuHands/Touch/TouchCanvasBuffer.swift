@@ -56,12 +56,10 @@ open class TouchCanvasBuffer: @unchecked Sendable {
                              y: CGFloat(-joint.pos.y * 400 + 800))
         
         let phase = joint.phase
-        let azimuth = CGFloat.zero
-        let altitude = CGFloat.zero
         
         touchLog.log(phase, nextXY, radius)
         
-        let item = TouchCanvasItem(previousItem, joint.hash, force, radius, nextXY, phase, azimuth, altitude, Visitor(0, .canvas))
+        let item = TouchCanvasItem(previousItem, joint.hash, force, radius, nextXY, phase, Visitor(0, .canvas)) 
         buffer.addItem(item, bufType: .localBuf)
         shareItem(item)
     }

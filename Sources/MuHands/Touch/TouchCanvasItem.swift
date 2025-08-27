@@ -66,6 +66,42 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
         logTouch()
     }
 
+
+    init(_ lastItem : TouchCanvasItem? = nil,
+         _ hash     : Int,
+         _ force    : CGFloat,
+         _ radius   : CGFloat,
+         _ next     : CGPoint,
+         _ phase    : UITouch.Phase,
+         _ visit    : Visitor) {
+
+        var force = Float(force)
+        var radius = Float(radius)
+
+        if let lastItem {
+
+            let forceFilter = Float(0.90)
+            force = (lastItem.force * forceFilter) + (force * (1-forceFilter))
+
+            let radiusFilter = Float(0.95)
+            radius = (lastItem.radius * radiusFilter) + (radius * (1-radiusFilter))
+            //PrintLog(String(format: "* %.3f -> %.3f", lastItem.force, force))
+        } else {
+            force = 0 // bug: always begins at 0.5
+        }
+        self.time   = Date().timeIntervalSince1970
+        self.hash   = hash
+        self.nextX  = Float(next.x)
+        self.nextY  = Float(next.y)
+        self.radius = Float(radius)
+        self.force  = Float(force)
+        self.azimX  = 0
+        self.azimY  = 0
+        self.phase  = Int(phase.rawValue)
+        self.type   = visit.type.rawValue
+    }
+
+
     init(_ lastItem : TouchCanvasItem? = nil,
          _ hash     : Int,
          _ force    : CGFloat,

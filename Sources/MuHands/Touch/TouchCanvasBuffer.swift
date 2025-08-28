@@ -59,7 +59,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         
         touchLog.log(phase, nextXY, radius)
         
-        let item = TouchCanvasItem(previousItem, joint.hash, force, radius, nextXY, phase, Visitor(0, .canvas)) 
+        let item = TouchCanvasItem(previousItem, joint.hash, force, radius, nextXY, phase, Visitor(0, [.pinch,.canvas])) 
         buffer.addItem(item, bufType: .localBuf)
         shareItem(item)
     }

@@ -66,7 +66,7 @@ extension TouchDraw {
         let visit = item.visit()
 
         // if using Apple Pencil and brush tilt is turned on
-        if item.force > 0, tilt {
+        if item.force > 0, tilt, !VisitType(rawValue: item.type).pinch {
 
             azimuth˚?.setNameNums([("x",-item.azimY),
                                    ("y",-item.azimX)], .fire, visit)

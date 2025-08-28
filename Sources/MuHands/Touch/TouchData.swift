@@ -1,6 +1,7 @@
 // created by musesum on 6/26/25
 
 import UIKit
+import MuFlo
 
 public typealias Hash = Int
 
@@ -12,6 +13,7 @@ public struct TouchData {
     let azimuth  : CGFloat
     let altitude : CGFloat
     let hash     : Hash
+    let type     : Int
 
     public init(force    : Float,
                 radius   : Float,
@@ -19,7 +21,8 @@ public struct TouchData {
                 phase    : Int,
                 azimuth  : CGFloat,
                 altitude : CGFloat,
-                hash     : Hash) {
+                hash     : Hash,
+                type     : Int) {
 
         self.force    = force
         self.radius   = radius
@@ -28,5 +31,6 @@ public struct TouchData {
         self.azimuth  = azimuth
         self.altitude = altitude
         self.hash     = hash
+        self.type     = type
     }
 }

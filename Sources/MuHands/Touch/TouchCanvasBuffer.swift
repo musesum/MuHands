@@ -99,7 +99,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
            let previousItem {
             // finger is stationary repeat last movement
             touchCubic.drawPoints(canvas.touchDraw.drawPoint)
-            if previousItem.isDone {
+            if previousItem.isTouchDone {
                 isDone = true
             }
 
@@ -131,7 +131,7 @@ extension TouchCanvasBuffer: TimedBufferDelegate {
         guard let item = item as? TouchCanvasItem else { return .nextBuf }
         let radius = canvas.touchDraw.updateRadius(item)
         let point = item.cgPoint
-        isDone = item.isDone
+        isDone = item.isTouchDone
         previousItem = isDone ? nil : item.repeated()
         touchCubic.addPointRadius(point, radius, isDone)
         touchCubic.drawPoints(canvas.touchDraw.drawPoint)

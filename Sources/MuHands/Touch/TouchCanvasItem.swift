@@ -159,16 +159,12 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
         //PrintLog("touchCanvasItem: \(nextX.digits(3)),\(nextY.digits(3))" )
 
     }
-
-    var isActive: Bool {
-        [UITouch.Phase.began.rawValue,
-         UITouch.Phase.moved.rawValue,
-         UITouch.Phase.stationary.rawValue]
-            .contains(phase)
+    var isTouchBegan: Bool {
+        phase == UITouch.Phase.began.rawValue
     }
-    var isDone:  Bool {
-        [UITouch.Phase.ended.rawValue,
-         UITouch.Phase.cancelled.rawValue]
+    var isTouchDone: Bool {
+        return [UITouch.Phase.ended.rawValue,
+                UITouch.Phase.cancelled.rawValue]
             .contains(phase)
     }
 }

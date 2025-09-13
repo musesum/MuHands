@@ -17,7 +17,7 @@ open class TouchCanvas: @unchecked Sendable {
     public var immersive = false
     public var drawableSize = CGSize.zero
     public let scale: CGFloat
-
+    private var lock = NSLock()
 
     public init(_ touchDraw: TouchDraw,
                 _ scale: CGFloat,
@@ -32,8 +32,11 @@ open class TouchCanvas: @unchecked Sendable {
         var removeKeys = [Int]()
         for (key, buf) in touchBuffers {
             let isDone = buf.flushTouches(touchRepeat)
-            if isDone { removeKeys.append(key) }
+            if isDone {
+                removeKeys.append(key)
+            }
         }
+        lock.lock(); defer { lock.unlock() }
         for key in removeKeys {
             touchBuffers.removeValue(forKey: key)
         }
@@ -69,6 +72,9 @@ extension TouchCanvas { // + TouchData
         }
     }
     public func remoteItem(_ item: TouchCanvasItem) {
+        if item.isTouchBegan {
+            flushTouchCanvas()
+        }
         if let touchBuffer = touchBuffers[item.hash] {
             touchBuffer.buffer.addItem(item, bufType: .remoteBuf)
         } else {

@@ -30,19 +30,19 @@ public struct DrawPoint {
 
     /// normalize DrawPoint mapping between input and output sizes
     public func normalize(_ inSize: CGSize, _ outSize: CGSize) -> DrawPoint {
-        let outWidth = Float(inSize.width)
-        let outHeight = Float(inSize.height)
-        let inWidth = Float(outSize.width)
-        let inHeight = Float(outSize.height)
-        guard outWidth > 0, outHeight > 0, inWidth > 0, inHeight > 0 else { return self }
+        let iw = Float(inSize.width)
+        let ih = Float(inSize.height)
+        let ow = Float(outSize.width)
+        let oh = Float(outSize.height)
+        guard iw > 0, ih > 0, ow > 0, oh > 0 else { return self }
 
         // aspect ratios
-        let outAspect = outWidth / outHeight
-        let inAaspect = inWidth / inHeight
+        let ia = iw / ih
+        let oa = ow / oh
 
         // touch in [0,1] of drawable
-        let outX = point.x / outWidth
-        let outY = point.y / outHeight
+        let ix = point.x / iw
+        let iy = point.y / ih
 
         // normalized crop rect inside the texture for aspect-fill
         var clipX: Float = 0,
@@ -50,16 +50,16 @@ public struct DrawPoint {
             clipW: Float = 1,
             clipH: Float = 1
 
-        if outAspect < inAaspect {
-            clipW = outAspect / inAaspect
+        if ia < oa {
+            clipW = ia / oa
             clipX = (1 - clipW) * 0.5
-        } else if outAspect > inAaspect {
-            clipH = inAaspect / outAspect
+        } else if ia > oa {
+            clipH = oa / ia
             clipY = (1 - clipH) * 0.5
         }
         // map to texture pixel coordinates
-        let normX = (outX * clipW + clipX) * inWidth
-        let normY = (outY * clipH + clipY) * inHeight
+        let normX = (ix * clipW + clipX) * ow
+        let normY = (iy * clipH + clipY) * oh
         return DrawPoint(SIMD2<Float>(normX, normY), radius, color)
     }
 }

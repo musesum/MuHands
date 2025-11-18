@@ -37,7 +37,7 @@ public class TouchDraw {
 
         let sky    = root.bind("sky"   )
         let input  = sky .bind("input" )
-        let draw   = sky .bind("draw"  )
+        let draw   = root.bind("draw"  )
         let brush  = draw.bind("brush" )
         let line   = draw.bind("line"  )
         let screen = draw.bind("screen")

@@ -13,7 +13,7 @@ open class TouchCanvas: @unchecked Sendable {
     var touchBuffers = [Int: TouchCanvasBuffer]()
     public let touchDraw: TouchDraw
     
-    public let share: Share
+    public let peers: Peers
     public var immersive = false
     public var drawableSize = CGSize.zero
     public let scale: CGFloat
@@ -21,11 +21,11 @@ open class TouchCanvas: @unchecked Sendable {
 
     public init(_ touchDraw: TouchDraw,
                 _ scale: CGFloat,
-                _ share: Share) {
+                _ peers: Peers) {
         self.touchDraw = touchDraw
         self.scale = scale
-        self.share = share
-        share.peers.addDelegate(self, for: .touchFrame)
+        self.peers = peers
+        peers.addDelegate(self, for: .touchFrame)
     }
 
     public func flushTouchCanvas() {

@@ -2,7 +2,7 @@
 
 import UIKit
 import MuFlo
-import MuPeers
+import MuPeers // DataFrom
 
 public typealias TouchDrawPoint = ((CGPoint, CGFloat)->())
 public typealias TouchDrawRadius = ((TouchCanvasItem)->(CGFloat))
@@ -71,12 +71,12 @@ extension TouchCanvas { // + TouchData
             touchBuffer.addTouchItem(touchData)
         }
     }
-    public func remoteItem(_ item: TouchCanvasItem) {
+    public func receiveItem(_ item: TouchCanvasItem, from: DataFrom) {
         if item.isTouchBegan {
             flushTouchCanvas()
         }
         if let touchBuffer = touchBuffers[item.hash] {
-            touchBuffer.buffer.addItem(item, bufType: .remoteBuf)
+            touchBuffer.buffer.addItem(item, from: .remote)
         } else {
             touchBuffers[item.hash] = TouchCanvasBuffer(item, self)
         }

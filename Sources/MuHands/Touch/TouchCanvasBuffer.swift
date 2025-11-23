@@ -25,7 +25,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 5)
         buffer.delegate = self
         addTouchItem(touch)
-        Reset.add(id,self)
+        Reset.addReset(id,self)
     }
     
     public init(_ item: TouchCanvasItem,
@@ -34,8 +34,8 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         self.canvas = canvas
         self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 5)
         buffer.delegate = self
-        buffer.addItem(item, bufType: .remoteBuf)
-        Reset.add(id,self)
+        buffer.addItem(item, from: .remote)
+        Reset.addReset(id,self)
     }
     
     public init(_ joint: JointState,
@@ -45,9 +45,12 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 5)
         buffer.delegate = self
         addTouchHand(joint)
-        Reset.add(id,self)
+        Reset.addReset(id,self)
     }
-    
+    deinit {
+        Reset.removeReset(id)
+    }
+
     public func addTouchHand(_ joint: JointState) {
 
         let force = CGFloat(joint.pos.z) * -200
@@ -60,7 +63,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         touchLog.log(phase, nextXY, radius)
         
         let item = TouchCanvasItem(previousItem, joint.hash, force, radius, nextXY, phase, Visitor(0, [.pinch,.canvas])) 
-        buffer.addItem(item, bufType: .localBuf)
+        buffer.addItem(item, from: .local)
         shareItem(item)
     }
     func shareItem(_ item: TouchCanvasItem) {
@@ -79,7 +82,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
     public func addTouchItem(_ touchData: TouchData) {
 
         let item = TouchCanvasItem(previousItem, touchData)
-        buffer.addItem(item, bufType: .localBuf)
+        buffer.addItem(item, from: .local)
         Task {
             await canvas.peers.sendItem(.touchFrame) {
                 do {
@@ -118,7 +121,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
             }
         }
         if isDone {
-            Reset.remove(id) // remove Panic
+            Reset.removeReset(id) // remove Panic
         }
         return isDone
     }
@@ -127,7 +130,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
 extension TouchCanvasBuffer: TimedBufferDelegate {
     public typealias Item = TouchCanvasItem
 
-    public func flushItem<Item>(_ item: Item, _ type: BufType) -> BufState {
+    public func flushItem<Item>(_ item: Item, _ from: DataFrom) -> BufState {
         guard let item = item as? TouchCanvasItem else { return .nextBuf }
         let radius = canvas.touchDraw.updateRadius(item)
         let point = item.cgPoint

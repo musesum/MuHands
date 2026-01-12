@@ -10,6 +10,7 @@ extension TouchCanvas: PeersDelegate {
         let decoder = JSONDecoder()
         if let item = try? decoder.decode(TouchCanvasItem.self, from: data) {
             receiveItem(item, from: from)
+            
         }
     }
 }

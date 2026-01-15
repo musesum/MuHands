@@ -13,7 +13,7 @@ public class JointState {
     public var joint: JointEnum!
     public var pos = SIMD3<Float>.zero
 
-    public var time = TimeInterval(0)
+    public var time = Date().timeIntervalSince1970
     public var timeBegin = TimeInterval(0)
     public var timeEnded = TimeInterval(0)
     public var taps = 0

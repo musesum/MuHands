@@ -20,10 +20,11 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
                 _ force   : Float,
                 _ azimuth : CGVector,
                 _ phase   : UITouch.Phase,
+                _ time    : TimeInterval,
                 _ visit   : Visitor) {
 
         // tested timeDrift between UITouches.time and Date() is around 30 msec
-        self.time   = Date().timeIntervalSince1970
+        self.time   = time
         self.hash   = hash
         self.nextX  = Float(next.x)
         self.nextY  = Float(next.y)
@@ -40,7 +41,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
         let azimuth = TouchCanvasItem.touchAzim(touchData)
         let (force,radius) = prevItem?.filterForceRadius(touchData.force,
                                                          touchData.radius) ?? (0,touchData.radius)
-        self.time   = Date().timeIntervalSince1970
+        self.time   = touchData.time
         self.hash   = touchData.hash
         self.nextX  = Float(touchData.nextXY.x)
         self.nextY  = Float(touchData.nextXY.y)
@@ -59,10 +60,11 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
          _ radius   : CGFloat,
          _ next     : CGPoint,
          _ phase    : UITouch.Phase,
+         _ time     : TimeInterval,
          _ visit    : Visitor) {
 
         let (force,radius) = prevItem?.filterForceRadius(force,radius) ?? (0,Float(radius))
-        self.time   = Date().timeIntervalSince1970
+        self.time   = time
         self.hash   = hash
         self.nextX  = Float(next.x)
         self.nextY  = Float(next.y)
@@ -112,7 +114,9 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
         self.type   = repeated.type
     }
     static func touchAzim(_ touchData: TouchData) -> CGVector {
-        return touchAzim(touchData.type, touchData.altitude, touchData.azimuth)
+        return touchAzim(touchData.type,
+                         touchData.altitude,
+                         touchData.azimuth)
     }
 
     static func touchAzim(_ type: Int, _ altitude: CGFloat, _ azimuth: CGFloat) -> CGVector {

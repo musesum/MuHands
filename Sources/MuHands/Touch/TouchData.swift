@@ -14,6 +14,7 @@ public struct TouchData {
     let altitude : CGFloat
     let hash     : Hash
     let type     : Int
+    let time     : TimeInterval
 
     public init(force    : Float,
                 radius   : Float,
@@ -22,7 +23,8 @@ public struct TouchData {
                 azimuth  : CGFloat,
                 altitude : CGFloat,
                 hash     : Hash,
-                type     : Int) {
+                type     : Int,
+                time     : TimeInterval) {
 
         self.force    = force
         self.radius   = radius
@@ -32,5 +34,6 @@ public struct TouchData {
         self.altitude = altitude
         self.hash     = hash
         self.type     = type
+        self.time     = time
     }
 }

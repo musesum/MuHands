@@ -22,7 +22,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
                 _ canvas: TouchCanvas) {
         
         self.canvas = canvas
-        self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 5)
+        self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 8)
         buffer.delegate = self
         addTouchItem(touch)
         Reset.addReset(id,self)
@@ -32,7 +32,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
                 _ canvas: TouchCanvas) {
 
         self.canvas = canvas
-        self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 5)
+        self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 8)
         buffer.delegate = self
         buffer.addItem(item, from: .remote)
         Reset.addReset(id,self)
@@ -42,7 +42,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
                 _ canvas: TouchCanvas) {
         
         self.canvas = canvas
-        self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 5)
+        self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 8)
         buffer.delegate = self
         addTouchHand(joint)
         Reset.addReset(id,self)
@@ -59,10 +59,11 @@ open class TouchCanvasBuffer: @unchecked Sendable {
                              y: CGFloat(-joint.pos.y * 400 + 800))
         
         let phase = joint.phase
-        
+        let time = joint.time
+
         touchLog.log(phase, nextXY, radius)
         
-        let item = TouchCanvasItem(previousItem, joint.hash, force, radius, nextXY, phase, Visitor(0, [.pinch,.canvas])) 
+        let item = TouchCanvasItem(previousItem, joint.hash, force, radius, nextXY, phase, time, Visitor(0, [.pinch,.canvas]))
         buffer.addItem(item, from: .local)
         shareItem(item)
     }

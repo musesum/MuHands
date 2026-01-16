@@ -36,7 +36,6 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         buffer.delegate = self
         buffer.addItem(item, from: .remote)
         Reset.addReset(id,self)
-        print("〄 TouchCanvasBuffer item init \(id)") //.....?
     }
     
     public init(_ joint: JointState,
@@ -47,10 +46,6 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         buffer.delegate = self
         addTouchHand(joint)
         Reset.addReset(id,self)
-        print("〄 TouchCanvasBuffer joint init \(id)") //.....?
-    }
-    deinit {
-        print("〄 TouchCanvasBuffer deinit \(id)") //.....?
     }
 
     public func addTouchHand(_ joint: JointState) {

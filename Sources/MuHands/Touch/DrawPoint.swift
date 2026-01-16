@@ -2,7 +2,7 @@
 
 import Foundation
 
-public struct DrawPoint {
+public struct DrawPoint: Sendable {
 
     public var point: SIMD2<Float>
     public var radius: Float
@@ -63,3 +63,4 @@ public struct DrawPoint {
         return DrawPoint(SIMD2<Float>(normX, normY), radius, color)
     }
 }
+

@@ -68,32 +68,18 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         shareItem(item)
     }
     func shareItem(_ item: TouchCanvasItem) {
-        Task {
-            await canvas.peers.sendItem(.touchFrame) {
-                do {
-                    return try JSONEncoder().encode(item)
-                } catch {
-                    print(error)
-                    return nil
-                }
-            }
-        }
+        let payload: Data? = try? JSONEncoder().encode(item)
+        let peers = canvas.peers
+        Task.detached { await peers.sendItem(.touchFrame) { @Sendable in payload } }
     }
 
     public func addTouchItem(_ touchData: TouchData) {
 
         let item = TouchCanvasItem(previousItem, touchData)
         buffer.addItem(item, from: .local)
-        Task {
-            await canvas.peers.sendItem(.touchFrame) {
-                do {
-                    return try JSONEncoder().encode(item)
-                } catch {
-                    print(error)
-                    return nil
-                }
-            }
-        }
+        let payload: Data? = try? JSONEncoder().encode(item)
+        let peers = canvas.peers
+        Task.detached { await peers.sendItem(.touchFrame) { @Sendable in payload } }
     }
 
     func flushTouches(_ touchRepeat: Bool) -> Bool {

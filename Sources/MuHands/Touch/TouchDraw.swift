@@ -1,8 +1,8 @@
-
 import QuartzCore
 import MuFlo
+import Dispatch
 
-public class TouchDraw {
+public class TouchDraw: @unchecked Sendable {
 
     var root     : Flo?
     var tilt˚    : Flo?
@@ -27,7 +27,8 @@ public class TouchDraw {
     public private(set) var azimuth = CGPoint.zero
     public let scale: CGFloat
 
-    public var drawPoints: [DrawPoint] = []
+    private var drawPoints: [DrawPoint] = []
+    private var lock = NSLock()
 
     public init(_ root: Flo,
                 _ scale: CGFloat) {
@@ -42,23 +43,27 @@ public class TouchDraw {
         let line   = draw.bind("line"  )
         let screen = draw.bind("screen")
 
-        tilt˚    = input .bind("tilt"   ) { f,_ in self.tilt    = f.bool    }
-        press˚   = brush .bind("press"  ) { f,_ in self.press   = f.bool    }
-        size˚    = brush .bind("size"   ) { f,_ in self.size    = f.cgFloat }
-        index˚   = brush .bind("index"  ) { f,_ in self.brush   = f.uint32  }
-        prev˚    = line  .bind("prev"   ) { f,_ in self.prev    = f.cgPoint }
-        next˚    = line  .bind("next"   ) { f,_ in self.next    = f.cgPoint }
-        force˚   = input .bind("force"  ) { f,_ in self.force   = f.cgFloat }
-        radius˚  = input .bind("radius" ) { f,_ in self.radius  = f.cgFloat }
-        azimuth˚ = input .bind("azimuth") { f,_ in self.azimuth = f.cgPoint }
-        fill˚    = screen.bind("fill"   ) { f,_ in setFill(f.float)
-        }
-        func setFill(_ f: Float) {
-            drawPoints.removeAll(keepingCapacity: true)
-            drawPoints.append(DrawPoint(fill: f))
-        }
+        tilt˚    = input .bind("tilt"   ) { [weak self] f,_ in self?.tilt    = f.bool    }
+        press˚   = brush .bind("press"  ) { [weak self] f,_ in self?.press   = f.bool    }
+        size˚    = brush .bind("size"   ) { [weak self] f,_ in self?.size    = f.cgFloat }
+        index˚   = brush .bind("index"  ) { [weak self] f,_ in self?.brush   = f.uint32  }
+        prev˚    = line  .bind("prev"   ) { [weak self] f,_ in self?.prev    = f.cgPoint }
+        next˚    = line  .bind("next"   ) { [weak self] f,_ in self?.next    = f.cgPoint }
+        force˚   = input .bind("force"  ) { [weak self] f,_ in self?.force   = f.cgFloat }
+        radius˚  = input .bind("radius" ) { [weak self] f,_ in self?.radius  = f.cgFloat }
+        azimuth˚ = input .bind("azimuth") { [weak self] f,_ in self?.azimuth = f.cgPoint }
+        fill˚    = screen.bind("fill"   ) { [weak self] f,_ in self?.setFill(f.float) }
     }
+
+    private func setFill(_ f: Float) {
+        lock.lock()
+        drawPoints.removeAll(keepingCapacity: true)
+        drawPoints.append(DrawPoint(fill: f))
+        lock.unlock()
+    }
+
 }
+
 extension TouchDraw {
     /// get radius of TouchCanvasItem
     public func updateRadius(_ item: TouchCanvasItem) -> CGFloat {
@@ -88,14 +93,26 @@ extension TouchDraw {
         return radiusNow
     }
 
+    public func takeDrawPoints() -> [DrawPoint] {
+
+        lock.lock()
+        let points = drawPoints
+        drawPoints.removeAll()
+        lock.unlock()
+        
+        return points
+
+    }
 }
 
 extension TouchDraw {
 
     public func drawPoint(_ point: CGPoint,
-                          _ radius: CGFloat) {
+                          _ radius: CGFloat) { 
 
         let drawPoint = DrawPoint(point, radius, brush, scale)
+        lock.lock()
         drawPoints.append(drawPoint)
+        lock.unlock()
     }
 }

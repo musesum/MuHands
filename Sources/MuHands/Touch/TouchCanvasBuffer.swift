@@ -25,7 +25,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 8)
         buffer.delegate = self
         addTouchItem(touch)
-        Reset.addReset(id,self)
+        Reset.addReset(id, self)
     }
     
     public init(_ item: TouchCanvasItem,
@@ -35,7 +35,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 8)
         buffer.delegate = self
         buffer.addItem(item, from: .remote)
-        Reset.addReset(id,self)
+        Reset.addReset(id, self)
     }
     
     public init(_ joint: JointState,
@@ -45,7 +45,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 8)
         buffer.delegate = self
         addTouchHand(joint)
-        Reset.addReset(id,self)
+        Reset.addReset(id, self)
     }
 
     public func addTouchHand(_ joint: JointState) {
@@ -67,7 +67,7 @@ open class TouchCanvasBuffer: @unchecked Sendable {
     func shareItem(_ item: TouchCanvasItem) {
         let payload: Data? = try? JSONEncoder().encode(item)
         let peers = canvas.peers
-        Task.detached { await peers.sendItem(.touchFrame) { @Sendable in payload } }
+        Task.detached { await peers.sendItem(.touchFrame, item.time) { @Sendable in payload } }
     }
 
     public func addTouchItem(_ touchData: TouchData) {
@@ -76,7 +76,8 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         buffer.addItem(item, from: .local)
         let payload: Data? = try? JSONEncoder().encode(item)
         let peers = canvas.peers
-        Task.detached { await peers.sendItem(.touchFrame) { @Sendable in payload } }
+        let time = touchData.time
+        Task.detached { await peers.sendItem(.touchFrame, time) { @Sendable in payload } }
     }
 
     func flushTouches(_ touchRepeat: Bool) -> Bool {

@@ -13,19 +13,18 @@ open class TouchCanvas: @unchecked Sendable {
     var touchBuffers = [Int: TouchCanvasBuffer]()
     public let touchDraw: TouchDraw
     
-    public let peers: Peers
     public var immersive = false
     public var drawableSize = CGSize.zero
     public let scale: CGFloat
     private var lock = NSLock()
 
     public init(_ touchDraw: TouchDraw,
-                _ scale: CGFloat,
-                _ peers: Peers) {
+                _ scale: CGFloat) {
         self.touchDraw = touchDraw
         self.scale = scale
-        self.peers = peers
-        peers.addDelegate(self, for: .touchFrame)
+        Task { @MainActor in
+            Peers.shared.addDelegate(self, for: .touchFrame)
+        }
     }
 
     public func flushTouchCanvas() {

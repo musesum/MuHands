@@ -134,6 +134,7 @@ extension TouchCanvasBuffer: TimedBufferDelegate {
 
 extension TouchCanvasBuffer: ResetDelegate {
     public func resetAll() {
+        print("TapeCanvasBuffer::\(#function)") //.....
         buffer.resetAll() // assuming reset() empties the buffer; replace with buffer.clear() if that is the correct API
         previousItem = nil
         indexNow = 0

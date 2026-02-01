@@ -62,12 +62,13 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         
         let item = TouchCanvasItem(previousItem, joint.hash, force, radius, nextXY, phase, time, Visitor(0, [.pinch,.canvas]))
         buffer.addItem(item, from: .local)
-        shareItem(item)
+        canvas.shareItem(item)
     }
     func shareItem(_ item: TouchCanvasItem) {
-        let payload: Data? = try? JSONEncoder().encode(item)
+   
         Task.detached {
-            await Peers.shared.sendItem(.touchFrame) { @Sendable in payload
+            await Peers.shared.sendItem(.touchFrame) { @Sendable in
+                try? JSONEncoder().encode(item)
             }
         }
     }

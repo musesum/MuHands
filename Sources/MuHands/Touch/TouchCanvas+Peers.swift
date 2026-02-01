@@ -13,4 +13,12 @@ extension TouchCanvas: PeersDelegate {
             
         }
     }
+    public func shareItem(_ item: Any) {
+        guard let item = item as? TouchCanvasItem else { return }
+        Task.detached {
+            await Peers.shared.sendItem(.touchFrame) { @Sendable in
+                try? JSONEncoder().encode(item)
+            }
+        }
+    }
 }

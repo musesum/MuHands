@@ -5,7 +5,7 @@ import MuFlo
 import MuPeers
 
 open class TouchCanvasBuffer: @unchecked Sendable {
-    let id = Visitor.nextId()
+    private let itemId: Int
 
     // smooth and/or repeat last time
     private var previousItem: TouchCanvasItem?
@@ -23,9 +23,11 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         
         self.canvas = canvas
         self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 8)
+        self.itemId = touch.hash
+
         buffer.delegate = self
         addTouchItem(touch)
-        Reset.addReset(id, self)
+        Reset.addReset(itemId, self)
     }
     
     public init(_ item: TouchCanvasItem,
@@ -33,9 +35,12 @@ open class TouchCanvasBuffer: @unchecked Sendable {
 
         self.canvas = canvas
         self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 8)
+        self.itemId = item.hash
+
         buffer.delegate = self
         buffer.addItem(item, from: .remote)
-        Reset.addReset(id, self)
+
+        Reset.addReset(itemId, self) //..... was id
     }
     
     public init(_ joint: JointState,
@@ -43,9 +48,11 @@ open class TouchCanvasBuffer: @unchecked Sendable {
         
         self.canvas = canvas
         self.buffer = TimedBuffer<TouchCanvasItem>(capacity: 8)
+        self.itemId = joint.joint.rawValue
         buffer.delegate = self
         addTouchHand(joint)
-        Reset.addReset(id, self)
+
+        Reset.addReset(itemId, self)
     }
 
     public func addTouchHand(_ joint: JointState) {
@@ -144,7 +151,7 @@ extension TouchCanvasBuffer: ResetDelegate {
         touchLog = TouchLog()
     }
     public func tearDown() {
-        buffer.tearDown()
-        Reset.removeReset(id)
+        buffer.tearDown() //..... redundant?
+        Reset.removeReset(itemId)
     }
 }

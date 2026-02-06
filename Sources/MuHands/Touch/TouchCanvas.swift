@@ -23,7 +23,7 @@ open class TouchCanvas: @unchecked Sendable {
         self.touchDraw = touchDraw
         self.scale = scale
         Task { @MainActor in
-            Peers.shared.addDelegate(self, for: .touchFrame)
+            Peers.shared.addDelegate(self, for: .touchCanvas)
         }
     }
 
@@ -79,6 +79,12 @@ extension TouchCanvas { // + TouchData
             touchBuffer.buffer.addItem(item, from: .remote)
         } else {
             touchBuffers[item.hash] = TouchCanvasBuffer(item, self)
+        }
+    }
+    public func resetItem(_ item: TouchCanvasItem) {
+        if let buffer = touchBuffers[item.hash] {
+            buffer.resetAll()
+            touchBuffers.removeValue(forKey: item.hash)
         }
     }
 }

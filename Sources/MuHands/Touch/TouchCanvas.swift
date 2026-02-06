@@ -35,10 +35,11 @@ open class TouchCanvas: @unchecked Sendable {
                 removeKeys.append(key)
             }
         }
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
         for key in removeKeys {
             touchBuffers.removeValue(forKey: key)
         }
+        lock.unlock()
     }
 
     public func beginJointState(_ jointState: JointState) {

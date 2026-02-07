@@ -10,9 +10,9 @@ public typealias TouchDrawRadius = ((TouchCanvasItem)->(CGFloat))
 open class TouchCanvas: @unchecked Sendable {
     
     var touchRepeat = true
-    var touchBuffers = [Int: TouchCanvasBuffer]()
+    var touchBuffers = [Int: TouchBuffer]()
+
     public let touchDraw: TouchDraw
-    
     public var immersive = false
     public var drawableSize = CGSize.zero
     public let scale: CGFloat
@@ -43,7 +43,7 @@ open class TouchCanvas: @unchecked Sendable {
     }
 
     public func beginJointState(_ jointState: JointState) {
-        touchBuffers[jointState.hash] = TouchCanvasBuffer(jointState, self)
+        touchBuffers[jointState.hash] = TouchBuffer(jointState, self)
         //DebugLog { P("👐 beginJoint \(jointState.joint˚?.path(2) ?? "??")") }
     }
 
@@ -62,7 +62,7 @@ extension TouchCanvas { // + TouchData
 
     public func beginTouch(_ touchData: TouchData) {
         if immersive { return }
-        touchBuffers[touchData.hash] = TouchCanvasBuffer(touchData, self)
+        touchBuffers[touchData.hash] = TouchBuffer(touchData, self)
     }
 
     public func updateTouch(_ touchData: TouchData) {
@@ -76,9 +76,9 @@ extension TouchCanvas { // + TouchData
             flushTouchCanvas()
         }
         if let touchBuffer = touchBuffers[item.hash] {
-            touchBuffer.buffer.addItem(item, from: .remote)
+            touchBuffer.addItem(item, from: .remote)
         } else {
-            touchBuffers[item.hash] = TouchCanvasBuffer(item, self)
+            touchBuffers[item.hash] = TouchBuffer(item, self)
         }
     }
     public func resetItem(_ item: TouchCanvasItem) {

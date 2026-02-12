@@ -28,6 +28,7 @@ open class TouchCanvas: @unchecked Sendable {
     }
 
     public func flushTouchCanvas() {
+        lock.lock(); defer { lock.unlock() }
         var removeKeys = [Int]()
         for (key, buf) in touchBuffers {
             let isDone = buf.flushTouches(touchRepeat)
@@ -35,11 +36,9 @@ open class TouchCanvas: @unchecked Sendable {
                 removeKeys.append(key)
             }
         }
-        lock.lock()
         for key in removeKeys {
             touchBuffers.removeValue(forKey: key)
         }
-        lock.unlock()
     }
 
     public func beginJointState(_ jointState: JointState) {
@@ -62,11 +61,13 @@ extension TouchCanvas { // + TouchData
 
     public func beginTouch(_ touchData: TouchData) {
         if immersive { return }
+        lock.lock() ; defer { lock.unlock() }
         touchBuffers[touchData.hash] = TouchBuffer(touchData, self)
     }
 
     public func updateTouch(_ touchData: TouchData) {
         if immersive { return }
+        lock.lock() ; defer { lock.unlock() }
         if let touchBuffer = touchBuffers[touchData.hash] {
             touchBuffer.addTouchItem(touchData)
         }
@@ -75,6 +76,7 @@ extension TouchCanvas { // + TouchData
         if item.isTouchBegan {
             flushTouchCanvas()
         }
+        lock.lock() ; defer { lock.unlock() }
         if let touchBuffer = touchBuffers[item.hash] {
             touchBuffer.addItem(item, from: .remote)
         } else {
@@ -82,6 +84,7 @@ extension TouchCanvas { // + TouchData
         }
     }
     public func resetItem(_ item: TouchCanvasItem) {
+        lock.lock() ; defer { lock.unlock() }
         if let buffer = touchBuffers[item.hash] {
             buffer.resetAll()
             touchBuffers.removeValue(forKey: item.hash)

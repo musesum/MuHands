@@ -6,15 +6,6 @@ import MuPeers
 import NIOCore
 
 
-public protocol TouchBufferDelegate {
-    associatedtype Item
-    mutating func flushItem<Item>(_ item: Item, _ from: DataFrom) -> BufState
-}
-
-public protocol TimedItem: Sendable {
-    var time: TimeInterval { get }
-}
-
 open class TouchBuffer: @unchecked Sendable {
     private let itemId: Int
 
@@ -206,9 +197,6 @@ extension TouchBuffer { // Timed Buffer
         return state
     }
 
-}
-
-extension TouchBuffer: TouchBufferDelegate {
     public typealias Item = TouchCanvasItem
 
     public func flushItem<Item>(_ item: Item, _ from: DataFrom) -> BufState {

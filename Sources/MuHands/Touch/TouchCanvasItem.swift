@@ -1,7 +1,7 @@
 import UIKit
 import MuFlo
 
-public struct TouchCanvasItem: Codable, TimedItem, Sendable {
+public struct TouchCanvasItem: Codable, Sendable {
 
     public let hash   : Hash   // unique id of touch
     public let time   : Double // time event was created
@@ -51,7 +51,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
         self.azimY  = azimuth.dy
         self.phase  = touchData.phase
         self.type   = VisitType.canvas.rawValue
-        logTouch()
+        //PrintLog("touchCanvasItem: \(nextX.digits(3)),\(nextY.digits(3))" )
     }
 
     init(_ prevItem : TouchCanvasItem? = nil,
@@ -159,10 +159,7 @@ public struct TouchCanvasItem: Codable, TimedItem, Sendable {
     public func visit() -> Visitor {
         return Visitor(0, VisitType(rawValue: type))
     }
-    func logTouch() {
-        //PrintLog("touchCanvasItem: \(nextX.digits(3)),\(nextY.digits(3))" )
 
-    }
     var isTouchBegan: Bool {
         phase == UITouch.Phase.began.rawValue
     }

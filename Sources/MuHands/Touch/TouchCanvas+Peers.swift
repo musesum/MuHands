@@ -16,8 +16,11 @@ extension TouchCanvas: PeersDelegate {
         if let item = try? decoder.decode(TouchCanvasItem.self, from: playItem.data) {
             resetItem(item)
         }
-
     }
+    public func playItem(_ item: PlayItem, from: DataFrom) {
+        received(data: item.data, from: from)
+    }
+    
     public func shareItem(_ item: Any) {
         guard let item = item as? TouchCanvasItem else { return }
         Task.detached {

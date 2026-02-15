@@ -5,7 +5,6 @@ import MuFlo
 import MuPeers
 import NIOCore
 
-
 open class TouchBuffer: @unchecked Sendable {
     private let itemId: Int
 

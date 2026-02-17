@@ -56,7 +56,8 @@ open class TouchBuffer: @unchecked Sendable {
 
         self.canvas = canvas
         self.itemId = item.hash
-        addItem(item, from: .remote)
+        // defaulted to unknown remote peer
+        addItem(item, from: .remote("?"))
         Reset.addReset(itemId, self)
     }
     

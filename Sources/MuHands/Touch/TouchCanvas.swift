@@ -11,6 +11,7 @@ open class TouchCanvas: @unchecked Sendable {
     
     var touchRepeat = true
     var touchBuffers = [Int: TouchBuffer]()
+    var peerTouches = [String: Set<Int>]()
 
     public let touchDraw: TouchDraw
     public var immersive = false
@@ -77,8 +78,15 @@ extension TouchCanvas { // + TouchData
             flushTouchCanvas()
         }
         lock.lock() ; defer { lock.unlock() }
+        
+        // Track remote touches by peer
+        if case .remote(let peerId) = from {
+            if peerTouches[peerId] == nil { peerTouches[peerId] = [] }
+            peerTouches[peerId]?.insert(item.hash)
+        }
+        
         if let touchBuffer = touchBuffers[item.hash] {
-            touchBuffer.addItem(item, from: .remote)
+            touchBuffer.addItem(item, from: .remote("?"))
         } else {
             touchBuffers[item.hash] = TouchBuffer(item, self)
         }
@@ -89,5 +97,20 @@ extension TouchCanvas { // + TouchData
             buffer.resetAll()
             touchBuffers.removeValue(forKey: item.hash)
         }
+    }
+    
+    public func clearPeerTouches(_ peerId: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        
+        guard let hashes = peerTouches[peerId] else { return }
+        
+        for hash in hashes {
+            if let buffer = touchBuffers[hash] {
+                buffer.resetAll() 
+                touchBuffers.removeValue(forKey: hash)
+            }
+        }
+        peerTouches.removeValue(forKey: peerId)
     }
 }

@@ -2,6 +2,7 @@
 
 import Foundation
 import MuPeers
+import MuFlo
 
 extension TouchCanvas: PeersDelegate {
 
@@ -27,6 +28,15 @@ extension TouchCanvas: PeersDelegate {
             await Peers.shared.sendItem(.touchCanvas) { @Sendable in
                 try? JSONEncoder().encode(item)
             }
+        }
+    }
+
+    public func dropped(from: DataFrom) {
+
+        if case .remote(let peerId) = from,
+           peerId.prefix(1) == PeersPrefix  {
+            PrintLog("📡 TouchCanvas dropped")
+            clearPeerTouches(peerId)
         }
     }
 }

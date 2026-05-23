@@ -1,0 +1,28 @@
+name: MuHandsTestHost
+options:
+  bundleIdPrefix: com.deepmuse
+  createIntermediateGroups: true
+  deploymentTarget:
+    iOS: "17.0"
+
+packages:
+  MuHands:
+    path: .
+
+targets:
+  MuHandsTestHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: TestHost
+    dependencies:
+      - package: MuHands
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "6.0"
+        PRODUCT_BUNDLE_IDENTIFIER: com.deepmuse.MuHandsTestHost
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""

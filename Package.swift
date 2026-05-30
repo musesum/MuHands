@@ -4,11 +4,12 @@ import PackageDescription
 
 let package = Package(
     name: "MuHands",
-    platforms: [.iOS(.v17), .visionOS(.v2)],
+    platforms: [.iOS(.v17), .visionOS(.v2), .watchOS(.v10)],
     products: [.library( name: "MuHands",  targets: ["MuHands"] ) ],
     dependencies: [
-        .package(url: "https://github.com/musesum/MuFlo.git", branch: "main"),
-        .package(url: "https://github.com/musesum/MuPeers.git", branch: "main"),
+        // DEV: local paths during watchOS port. Restore github URLs before publish.
+        .package(name: "MuFlo", path: "../MuFlo"),
+        .package(name: "MuPeers", path: "../MuPeers"),
     ],
     targets: [
         .target(  name: "MuHands",

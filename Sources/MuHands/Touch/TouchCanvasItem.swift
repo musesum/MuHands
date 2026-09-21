@@ -13,27 +13,55 @@ public struct TouchCanvasItem: Codable, Sendable {
     public let azimY  : Double // pencil tilt Y
     public let phase  : Int    // UITouch.Phase.rawValue
     public let type   : Int    // Visitor.type
+    /// pencil altitude in radians, π/2 upright; fingers, joints, midi dots and
+    /// items from a peer that predates the field all read upright, so the tilt
+    /// shading in TouchDraw leaves their radius alone
+    public let altitude : Double
 
-    public init(_ hash    : Hash,
-                _ next    : CGPoint,
-                _ radius  : Float,
-                _ force   : Float,
-                _ azimuth : CGVector,
-                _ phase   : UITouch.Phase,
-                _ time    : TimeInterval,
-                _ visit   : Visitor) {
+    public static let upright = Double.pi / 2
+
+    /// altitude arrived after the peer/tape wire format; a payload without
+    /// the key decodes as upright rather than failing the whole item
+    enum CodingKeys: String, CodingKey {
+        case hash, time, nextX, nextY, force, radius, azimX, azimY, phase, type, altitude
+    }
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        hash     = try c.decode(Hash.self,   forKey: .hash)
+        time     = try c.decode(Double.self, forKey: .time)
+        nextX    = try c.decode(Float.self,  forKey: .nextX)
+        nextY    = try c.decode(Float.self,  forKey: .nextY)
+        force    = try c.decode(Float.self,  forKey: .force)
+        radius   = try c.decode(Float.self,  forKey: .radius)
+        azimX    = try c.decode(Double.self, forKey: .azimX)
+        azimY    = try c.decode(Double.self, forKey: .azimY)
+        phase    = try c.decode(Int.self,    forKey: .phase)
+        type     = try c.decode(Int.self,    forKey: .type)
+        altitude = try c.decodeIfPresent(Double.self, forKey: .altitude) ?? Self.upright
+    }
+
+    public init(_ hash     : Hash,
+                _ next     : CGPoint,
+                _ radius   : Float,
+                _ force    : Float,
+                _ azimuth  : CGVector,
+                _ phase    : UITouch.Phase,
+                _ time     : TimeInterval,
+                _ visit    : Visitor,
+                _ altitude : CGFloat = TouchCanvasItem.upright) {
 
         // tested timeDrift between UITouches.time and Date() is around 30 msec
-        self.time   = time
-        self.hash   = hash
-        self.nextX  = Float(next.x)
-        self.nextY  = Float(next.y)
-        self.radius = Float(radius)
-        self.force  = Float(force)
-        self.azimX  = azimuth.dx
-        self.azimY  = azimuth.dy
-        self.phase  = Int(phase.rawValue)
-        self.type   = visit.type.rawValue
+        self.time     = time
+        self.hash     = hash
+        self.nextX    = Float(next.x)
+        self.nextY    = Float(next.y)
+        self.radius   = Float(radius)
+        self.force    = Float(force)
+        self.azimX    = azimuth.dx
+        self.azimY    = azimuth.dy
+        self.phase    = Int(phase.rawValue)
+        self.type     = visit.type.rawValue
+        self.altitude = Double(altitude)
     }
     init(_ prevItem: TouchCanvasItem?,
          _ touchData: TouchData) {
@@ -51,6 +79,7 @@ public struct TouchCanvasItem: Codable, Sendable {
         self.azimY  = azimuth.dy
         self.phase  = touchData.phase
         self.type   = VisitType.canvas.rawValue
+        self.altitude = Double(touchData.altitude)
         //PrintLog("touchCanvasItem: \(nextX.digits(3)),\(nextY.digits(3))" )
     }
 
@@ -74,6 +103,7 @@ public struct TouchCanvasItem: Codable, Sendable {
         self.azimY  = 0
         self.phase  = Int(phase.rawValue)
         self.type   = visit.type.rawValue
+        self.altitude = Self.upright
     }
 
     init(_ prevItem : TouchCanvasItem? = nil,
@@ -99,6 +129,7 @@ public struct TouchCanvasItem: Codable, Sendable {
         self.azimY  = azimuth.dy
         self.phase  = Int(phase.rawValue)
         self.type   = visit.type.rawValue
+        self.altitude = Double(altitude)
     }
     init(repeated: TouchCanvasItem) {
 
@@ -112,6 +143,7 @@ public struct TouchCanvasItem: Codable, Sendable {
         self.azimY  = repeated.azimY
         self.phase  = repeated.phase
         self.type   = repeated.type
+        self.altitude = repeated.altitude
     }
     static func touchAzim(_ touchData: TouchData) -> CGVector {
         return touchAzim(touchData.type,

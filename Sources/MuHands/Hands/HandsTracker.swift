@@ -5,7 +5,10 @@ import MuFlo
 
 #if os(visionOS)
 
-open class HandsTracker: ObservableObject {
+// @unchecked Sendable: session/handTracking are touched only from the async
+// start/update/monitor chain; annotation admits the existing access pattern
+// to Swift 6 without changing behavior.
+open class HandsTracker: ObservableObject, @unchecked Sendable {
 
     let session = ARKitSession()
     var handTracking: HandTrackingProvider?

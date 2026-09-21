@@ -16,13 +16,22 @@ public struct DrawPoint: Sendable {
         self.radius = Float(radius)
         self.color = Float(color)
     }
+    /// radius >= 0: a stroke dot at `point`.
+    /// radius == -1: pulse the false (index) layer to `fill`, ignoring `point`.
+    /// radius == -2: pulse the real layer to transparent (`clear`), ignoring `point`.
     init(fill: Float) {
         self.point = .zero
         self.radius = -1
         self.color = fill
     }
 
-    init(_ point: SIMD2<Float>, _ radius: Float, _ color: Float) {
+    init(clear: Float) {
+        self.point = .zero
+        self.radius = -2
+        self.color = clear
+    }
+
+    public init(_ point: SIMD2<Float>, _ radius: Float, _ color: Float) {
         self.point = point
         self.radius = radius
         self.color = color

@@ -86,10 +86,31 @@ open class TouchBuffer: @unchecked Sendable {
         addItem(item, from: .local)
         canvas.shareItem(item)
     }
+    /// concurrent-finger slots — the sequencer clusters each finger onto its
+    /// own adjacent roll row; slots recycle as touches lift
+    private var fingerSlots = [Int: Int]()   // touch hash → slot 1…
+    private func fingerSlot(_ hash: Int, _ phase: Int) -> Int {
+        if let slot = fingerSlots[hash] {
+            if phase >= 3 { fingerSlots.removeValue(forKey: hash) }
+            return slot
+        }
+        let used = Set(fingerSlots.values)
+        var slot = 1
+        while used.contains(slot) { slot += 1 }
+        if phase < 3 { fingerSlots[hash] = slot }
+        return slot
+    }
+    /// begin/moved/ended for the sequencer's begin+tail segments
+    private static func rollPhase(_ phase: Int) -> Int {
+        phase == 0 ? 0 : (phase >= 3 ? 2 : 1)
+    }
+
     func shareItem(_ item: TouchCanvasItem) {
-   
+
+        let phase = Self.rollPhase(item.phase)
+        let finger = fingerSlot(item.hash, item.phase)
         Task.detached {
-            await Peers.shared.sendItem(.touchCanvas) { @Sendable in
+            await Peers.shared.sendItem(.touchCanvas, phase: phase, finger: finger) { @Sendable in
                 try? JSONEncoder().encode(item)
             }
         }
@@ -100,8 +121,10 @@ open class TouchBuffer: @unchecked Sendable {
         let item = TouchCanvasItem(previousItem, touchData)
         addItem(item, from: .local)
         let payload: Data? = try? JSONEncoder().encode(item)
+        let phase = Self.rollPhase(touchData.phase)
+        let finger = fingerSlot(touchData.hash, touchData.phase)
         Task.detached {
-            await Peers.shared.sendItem(.touchCanvas) {
+            await Peers.shared.sendItem(.touchCanvas, phase: phase, finger: finger) {
                 @Sendable in payload
             }
         }
@@ -109,7 +132,7 @@ open class TouchBuffer: @unchecked Sendable {
 
     func flushTouches(_ touchRepeat: Bool) -> Bool {
         
-        if buffer.isEmpty,
+        if isEmpty,
            touchRepeat,
            let previousItem {
             // finger is stationary repeat last movement
@@ -177,21 +200,32 @@ extension TouchBuffer { // Timed Buffer
     public func flushBuf() -> BufState {
 
         var state: BufState = .nextBuf
-        while !buffer.isEmpty, state != .doneBuf {
+        // read the head under the lock, draw outside it: `addItem` appends from
+        // the hand stream while this runs on the render thread, and flushItem
+        // reaches the canvas — holding the lock across it stalled both
+        while state != .doneBuf {
 
             let timeNow = Date().timeIntervalSince1970
 
-            lock.lock(); defer { lock.unlock() }
-
-            guard let (item, futureTime, type) = buffer.first else { return .doneBuf }
-            if futureTime > timeNow {  return .waitBuf }
+            lock.lock()
+            guard let (item, futureTime, type) = buffer.first else {
+                lock.unlock()
+                return .nextBuf // drained, not done — done is item.isTouchDone
+            }
+            if futureTime > timeNow {
+                lock.unlock()
+                return .waitBuf
+            }
+            lock.unlock()
 
             state = flushItem(item, type)
 
             NoTimeLog("\(self.itemId)", interval: 0.5 ) { P("⏱️ id.state: \(self.itemId).\(state.description)") }
 
             if state == .nextBuf {
-                _ = buffer.removeFirst()
+                lock.lock()
+                if !buffer.isEmpty { _ = buffer.removeFirst() }
+                lock.unlock()
             }
         }
         return state
